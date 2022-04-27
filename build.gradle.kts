@@ -27,6 +27,9 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation(kotlin("stdlib"))
     implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.3")
+
+    implementation("com.medicbk:spel:1.1.25")
+    implementation("com.desprice:springutils:1.0.0")
 }
 
 tasks.bootJar {

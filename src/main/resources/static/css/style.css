@@ -1,0 +1,176 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    padding-right: 3px;
+    padding-left: 3px;
+}
+
+.shadowed {
+    box-shadow: 2px 2px 5px 0px darkgrey;
+}
+
+tr {
+    background-color: inherit;
+    width: 100%;
+}
+
+td {
+    background-color: inherit;
+    border: dotted thin;
+    border-radius: 3px;
+    max-width: 50px !important;
+}
+
+tr.separator>td {
+    box-shadow: none;
+}
+
+#sources {
+    position: fixed;
+    left: 3px;
+    top: 0;
+    height: 6%;
+    padding: 5px;
+    transition: height .5s ease;
+    overflow-y: scroll;
+    border: solid thin lightgray;
+    border-radius: 5px;
+    background-color: beige;
+}
+
+#sources:hover {
+    height: 33%;
+    transition: height .5s ease;
+}
+
+.sources-param-name {
+    color: mediumblue;
+}
+.sources-param-value {
+    color: darkgreen;
+}
+
+#static {
+    width: 100%;
+    height: 10%;
+    margin-top: 3.5%;
+}
+
+#inputs {
+    width: 20%;
+    margin-left: 40%;
+    margin-bottom: 30px;
+}
+
+#inputs>#form>div {
+    width: 100%;
+    padding: 10px;
+}
+
+#submit {
+    width: 100%;
+    zoom: 1.5;
+}
+
+input#patientId {
+    width: 100%;
+    zoom: 1.5;
+}
+
+input#isHfRiskFactor {
+    zoom: 1.5;
+}
+
+input+label {
+    margin-left: 15px;
+}
+
+#condsTable {
+    width: 100%;
+    height: 80%;
+}
+
+#stringified {
+    margin-top: 30px;
+    background-color: beige;
+    border: solid thin darkblue;
+    border-radius: 5px;
+}
+
+.dsl-block {
+    transform: rotate(-90deg);
+}
+
+.dsl-block-td {
+}
+
+.dsl-plain {
+}
+
+.dsl-block-td:hover, .dsl-plain:hover {
+    border-color: #27d3d3;
+}
+
+.bool-false {
+    border: solid thin darkblue;
+    border-radius: 5px;
+    background-color: gainsboro;
+}
+.bool-true {
+    border: solid thin green;
+    border-radius: 5px;
+    background-color: aquamarine;
+}
+
+.operation-name {
+    font-weight: bold;
+    font-size: larger;
+    margin: 5px;
+}
+
+.operation-title {
+    font-style: italic;
+    font-size: small;
+    margin: 5px;
+}
+
+.operand-title {
+    font-style: italic;
+    margin: 5px;
+}
+
+.operand-condition {
+    font-size: smaller;
+    color: #999;
+    margin: 5px;
+}
+
+.separator {
+    background-color: transparent;
+    border: none !important;
+    width: 100%;
+}
+.separator>td {
+    margin: 0;
+    padding: 0;
+    border: none !important;
+}
+
+#beige {
+    position: absolute;
+    border: solid thin #aaa;
+    border-radius: 5px;
+    background-color: beige;
+    padding: 10px;
+    box-shadow: 7px 7px 15px 0px mediumaquamarine;
+}
+
+#beige.beige-hidden {
+    display: none;
+}
