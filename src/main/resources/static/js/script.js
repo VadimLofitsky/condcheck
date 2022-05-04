@@ -1,11 +1,16 @@
 document.addEventListener("DOMContentLoaded", start);
 
+let fieldsToSkipFieldName = "fieldsToSkip";
+let additionalListsFieldName = "additionalLists";
+
 var sources;
 var condsTable;
 var beige;
+var additionalListsDiv;
+var stringifiedCondsDiv;
 
 let boolClassMap = new Map([[false, 'bool-false'], [true, 'bool-true']]);
-var html = '';
+var condsHtml = '';
 var rowIsOpen = false;
 
 function start() {
@@ -17,6 +22,8 @@ function start() {
 
     condsTable = $("#condsTable>tbody")[0];
     beige = $("#beige");
+    additionalListsDiv = $("#add-lists")[0];
+    stringifiedCondsDiv = $("#stringified")[0];
 
     $("button").on("click", submit);
 
@@ -32,6 +39,11 @@ function start() {
 }
 
 function submit() {
+    sources.html("");
+    condsTable.innerHTML = "";
+    additionalListsDiv.innerHTML = "";
+    stringifiedCondsDiv.innerHTML = "";
+
     $.ajax({
         url: "http://localhost:9998/rest",
         method: "GET",
@@ -43,7 +55,7 @@ function submit() {
             console.log("***************************************************************************");
             console.log(response);
             console.log("***************************************************************************");
-            drawConds(response);
+            drawData(response);
         }
     });
 }
@@ -51,18 +63,21 @@ function submit() {
 function serializeForm() {
     return {
         patientId: $("input#patientId")[0].value,
-        isHfRiskFactor: ($("input#isHfRiskFactor")[0].checked || false)
+        isHfRiskFactor: ($("input#isHfRiskFactor")[0].checked || false),
+        isPrevTherapyCheck: ($("input#isPrevTherapyCheck")[0].checked || false)
     };
 }
 
-function drawConds(data) {
+function drawData(data) {
     updateSourceDataView(data.sources);
-    $("#stringified")[0].innerText = data.dsl.stringified;
+    updateAdditionalListsView(data.sources[additionalListsFieldName] || []);
 
-    html = '';
+    stringifiedCondsDiv.innerText = data.dsl.stringified;
+
+    condsHtml = '';
     rowIsOpen = false;
     buildHtmlForDslElement(data.dsl);
-    condsTable.innerHTML = html;
+    condsTable.innerHTML = condsHtml;
 
     $("td.dsl-plain").add($("td.dsl-block-td"))
         .mousemove(onLogicBlockHoverHandler)
@@ -70,13 +85,38 @@ function drawConds(data) {
 }
 
 function updateSourceDataView(data) {
+    let fieldsToSkip = data[fieldsToSkipFieldName] || [];
     let sourcesDivHtml = '<ul>';
     for(var p in data) {
-        if(p === 'fieldValues') continue;
+        if(fieldsToSkip.indexOf(p) !== -1 || p === fieldsToSkipFieldName) continue;
         sourcesDivHtml += `<li><span class="sources-param-name">${p}</span> = <span class="sources-param-value">${data[p]}</span></li>`
     }
     sourcesDivHtml += '</ul';
     sources.html(sourcesDivHtml);
+}
+
+function updateAdditionalListsView(data) {
+    additionalListsDiv.innerHTML = "";
+    data
+        .filter(list => list.length !== 0)
+        .forEach(list => {
+            var html = `<table class="table-add-lists shadowed"><thead>`;
+            html += `<tr>`;
+            for(var p in list[0]) {
+                html += `<td>${p}</td>`;
+            }
+            html += `</tr></thead><tbody>`;
+
+            list.forEach(el => {
+                html += `<tr class="shadowed">`;
+                for(var p in el) {
+                    html += `<td>${el[p]}</td>`;
+                }
+                html += `</tr>`;
+            });
+            html += `</tbody></table>`;
+            additionalListsDiv.innerHTML += html;
+    });
 }
 
 function onLogicBlockHoverHandler(ev) {
@@ -90,25 +130,25 @@ function onLogicBlockHoverHandler(ev) {
 
 function buildHtmlForDslElement(dsl) {
     if(dsl.type === 'PLAIN') {
-        html += !rowIsOpen ? `<tr class="${boolClassMap.get(dsl.state)} ${dsl.state}">` : '';
-        html += `<td class="${boolClassMap.get(dsl.state)} ${dsl.state} dsl-plain shadowed" data-stringified="${dsl.stringified}"><span class="operand-title">${dsl.title || ''}</span><br><span class="operand-condition">${dsl.cond || ''}</span></td>`;
-        html += `</tr>`;
+        condsHtml += !rowIsOpen ? `<tr class="${boolClassMap.get(dsl.state)} ${dsl.state}">` : '';
+        condsHtml += `<td class="${boolClassMap.get(dsl.state)} ${dsl.state} dsl-plain shadowed" data-stringified="${dsl.stringified}"><span class="operand-title">${dsl.title || ''}</span><br><span class="operand-condition">${dsl.cond || ''}</span></td>`;
+        condsHtml += `</tr>`;
         rowIsOpen = false;
     } else {
         let rowSpan = dsl.childrenCount * 2 - 1;
 
         if(!rowIsOpen) {
-            html += `<tr class="${boolClassMap.get(dsl.state)} ${dsl.state}">`;
+            condsHtml += `<tr class="${boolClassMap.get(dsl.state)} ${dsl.state}">`;
             rowIsOpen = true;
         }
 
-        html += `<td rowspan="${rowSpan}" class="${boolClassMap.get(dsl.state)} ${dsl.state} dsl-block-td shadowed" data-stringified="${dsl.stringified}"><span class="dsl-block"><span class="operation-name">${dsl.type}</span><br><span class="operation-title">${dsl.title || ''}</span></span></td>`;
+        condsHtml += `<td rowspan="${rowSpan}" class="${boolClassMap.get(dsl.state)} ${dsl.state} dsl-block-td shadowed" data-stringified="${dsl.stringified}"><span class="dsl-block"><span class="operation-name">${dsl.type}</span><br><span class="operation-title">${dsl.title || ''}</span></span></td>`;
 
         for(let i = 0; i < dsl.subConds.length; i++) {
             buildHtmlForDslElement(dsl.subConds[i]);
 
             if(i < (dsl.subConds.length - 1)) {
-                html += `<tr class="separator"><td>&nbsp;</td></tr>`;
+                condsHtml += `<tr class="separator"><td>&nbsp;</td></tr>`;
             }
         }
     }

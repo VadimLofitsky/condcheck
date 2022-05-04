@@ -23,9 +23,9 @@ class LogicThTypeService {
     @Autowired
     private lateinit var calcScriptContext: CalcScriptContext
 
-    private fun runHpTask(patientId: Long, isHfRiskFactor: Boolean): Pair<Boolean, Int> {
+    private fun runHpTask(patientId: Long, isHfRiskFactor: Boolean, isPrevTherapyCheck: Boolean): Pair<Boolean, Int> {
         val gradleTaskProcess = ProcessBuilder()
-            .command("gradle", "calcDataForThTypeChoice", "-PpatientId=$patientId", "-PisHfRiskFactor=$isHfRiskFactor")
+            .command("gradle", "calcDataForThTypeChoice", "-PpatientId=$patientId", "-PisHfRiskFactor=$isHfRiskFactor", "-PisPrevTherapyCheck=$isPrevTherapyCheck")
             .directory(File("/home/vadim/dev/repo/medicbk/hyper2"))
             .redirectErrorStream(true)
             .redirectOutput(File("/home/vadim/MyPrjs/kt/condcheck/log.txt").also { it.createNewFile() })
@@ -36,22 +36,23 @@ class LogicThTypeService {
         return isNotExpired to exitValue
     }
 
-    private fun getPatientCondCheckData(patientId: Long, isHfRiskFactor: Boolean): PatientCondCheckData {
-//        val (isNotExpired, exitValue) = runHpTask(patientId, isHfRiskFactor)
-//
-//        if(!isNotExpired) {
-//            logger.error("Задача gradle остановилась по таймауту!");
-//            throw RuntimeException("Задача gradle остановилась по таймауту!")
-//        }
-//        if(exitValue != 0) {
-//            logger.error("Задача gradle закончилась не нормально: код $exitValue!");
-//            throw RuntimeException("Задача gradle закончилась не нормально: код $exitValue!")
-//        }
+    private fun getPatientCondCheckData(patientId: Long, isHfRiskFactor: Boolean, isPrevTherapyCheck: Boolean): PatientCondCheckData {
+        val (isNotExpired, exitValue) = runHpTask(patientId, isHfRiskFactor, isPrevTherapyCheck)
+
+        if(!isNotExpired) {
+            logger.error("Задача gradle остановилась по таймауту!");
+            throw RuntimeException("Задача gradle остановилась по таймауту!")
+        }
+        if(exitValue != 0) {
+            logger.error("Задача gradle закончилась не нормально: код $exitValue!");
+            throw RuntimeException("Задача gradle закончилась не нормально: код $exitValue!")
+        }
 
         logger.info("Обработка ответа задачи gradle")
         return File("/home/vadim/MyPrjs/kt/condcheck/patient_datas/patient${patientId}_data.txt")
             .readBytes()
-            .let { jacksonObjectMapper().readValue(it) }
+            .let { jacksonObjectMapper().readValue<PatientCondCheckData>(it) }
+            .let { it.copy(selVarIds = it.selVarIds.sorted()) }
     }
 
     private fun getDslTree(patientCondCheckDataMap: Map<String, Any?>): ConditionDslElementDto? {
@@ -63,8 +64,8 @@ class LogicThTypeService {
         return LogicDslHpThType.dsl.collect(context)
     }
 
-    fun getDataObject(patientId: Long, isHfRiskFactor: Boolean): DataObject {
-        val patientCondCheckData = getPatientCondCheckData(patientId, isHfRiskFactor)
+    fun getDataObject(patientId: Long, isHfRiskFactor: Boolean, isPrevTherapyCheck: Boolean): DataObject {
+        val patientCondCheckData = getPatientCondCheckData(patientId, isHfRiskFactor, isPrevTherapyCheck)
         val sources = patientCondCheckData._getFieldsMap()
         return DataObject(
             sources = sources,

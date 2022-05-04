@@ -45,7 +45,7 @@ tr.separator>td {
 }
 
 #sources:hover {
-    height: 33%;
+    height: 50%;
     transition: height .5s ease;
 }
 
@@ -83,17 +83,38 @@ input#patientId {
     zoom: 1.5;
 }
 
-input#isHfRiskFactor {
+input[type=checkbox] {
     zoom: 1.5;
 }
 
-input+label {
+input[type=checkbox]+label {
     margin-left: 15px;
 }
 
 #condsTable {
     width: 100%;
     height: 80%;
+}
+
+#add-lists {
+    width: 100%;
+}
+.table-add-lists {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 90%;
+    margin-left: 5%;
+    border: solid thin lightgray;
+}
+.table-add-lists>thead {
+    text-align: center;
+    font-weight: bold;
+}
+.table-add-lists tr {
+    border-radius: 3px;
+}
+.table-add-lists td {
+    border: none !important;
 }
 
 #stringified {

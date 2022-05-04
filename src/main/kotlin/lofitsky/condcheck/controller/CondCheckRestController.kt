@@ -22,9 +22,10 @@ class CondCheckRestController {
 
     @GetMapping
     fun main(@RequestParam("patientId") patientId: Long,
-             @RequestParam("isHfRiskFactor") isHfRiskFactor: Boolean = false,
+             @RequestParam("isHfRiskFactor") isHfRiskFactor: Boolean? = false,
+             @RequestParam("isPrevTherapyCheck") isPrevTherapyCheck: Boolean? = false,
     ): DataObject {
-        logger.info("*** Запрос: patientId=$patientId, isHfRiskFactor=$isHfRiskFactor")
-        return logicThTypeService.getDataObject(patientId, isHfRiskFactor)
+        logger.info("*** Запрос: patientId=$patientId, isHfRiskFactor=$isHfRiskFactor, isPrevTherapyCheck=$isPrevTherapyCheck")
+        return logicThTypeService.getDataObject(patientId, isHfRiskFactor!!, isPrevTherapyCheck!!)
     }
 }
