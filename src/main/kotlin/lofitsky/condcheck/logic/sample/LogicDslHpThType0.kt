@@ -134,7 +134,7 @@ object LogicDslHpThType0 : LogicDsl() {
 
             or("тройная") {
                 and {
-                    cond3
+                    this+cond3
                     p("пред.терапия = тройная", "#selVarIds.contains(518L)")
                 }
 

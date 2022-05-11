@@ -6,7 +6,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.medicbk.calcfunc.CalcScriptContext
 import lofitsky.condcheck.getFieldsMap
 import lofitsky.condcheck.logic.dsl.ConditionDslElementDto
-import lofitsky.condcheck.logic.sample.LogicDslHpThType0
+import lofitsky.condcheck.logic.sample.LogicDslHpThType1
 import lofitsky.condcheck.model.DataObject
 import lofitsky.condcheck.model.PatientThTypeCondCheckDataV0
 import org.slf4j.Logger
@@ -25,6 +25,7 @@ class LogicThTypeV1ServiceImpl : ILogicService {
     private lateinit var calcScriptContext: CalcScriptContext
 
     private fun runHpTask(patientId: Long, isHfRiskFactor: Boolean, isPrevTherapyCheck: Boolean): Pair<Boolean, Int> {
+        logger.info("Запуск задачи gradle")
         val gradleTaskProcess = ProcessBuilder()
             .command("gradle", "calcDataForThTypeChoice", "-PpatientId=$patientId", "-PisHfRiskFactor=$isHfRiskFactor", "-PisPrevTherapyCheck=$isPrevTherapyCheck")
             .directory(File("/home/vadim/dev/repo/medicbk/hyper2"))
@@ -62,7 +63,7 @@ class LogicThTypeV1ServiceImpl : ILogicService {
             context.setVariable(it.key, it.value)
         }
 
-        return LogicDslHpThType0.dsl.collect(context)
+        return LogicDslHpThType1.dsl.collect(context)
     }
 
     override fun getDataObject(patientId: Long, isHfRiskFactor: Boolean, isPrevTherapyCheck: Boolean): DataObject {

@@ -25,6 +25,7 @@ class LogicThTypeV0ServiceImpl : ILogicService {
     private lateinit var calcScriptContext: CalcScriptContext
 
     private fun runHpTask(patientId: Long, isHfRiskFactor: Boolean, isPrevTherapyCheck: Boolean): Pair<Boolean, Int> {
+        logger.info("Запуск задачи gradle")
         val gradleTaskProcess = ProcessBuilder()
             .command("gradle", "calcDataForThTypeChoice", "-PpatientId=$patientId", "-PisHfRiskFactor=$isHfRiskFactor", "-PisPrevTherapyCheck=$isPrevTherapyCheck")
             .directory(File("/home/vadim/dev/repo/medicbk/hyper2"))
