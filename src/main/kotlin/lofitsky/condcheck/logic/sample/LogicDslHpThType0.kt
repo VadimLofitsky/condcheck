@@ -6,7 +6,7 @@ import lofitsky.condcheck.logic.dsl.or
 import lofitsky.condcheck.logic.dsl.p
 
 
-object LogicDslHpThType : LogicDsl() {
+object LogicDslHpThType0 : LogicDsl() {
     private val builder = Builder()
 
     private val cond1 = p("cond1: пред.терапия == Нет", "#selVarIds.contains(212L)")

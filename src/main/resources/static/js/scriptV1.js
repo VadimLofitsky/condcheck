@@ -45,7 +45,7 @@ function submit() {
     stringifiedCondsDiv.innerHTML = "";
 
     $.ajax({
-        url: "http://localhost:9998/rest",
+        url: "http://localhost:9998/rest/v1",
         method: "GET",
         async: true,
         cache: false,
