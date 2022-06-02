@@ -7,28 +7,28 @@ import org.springframework.expression.spel.standard.SpelExpressionParser
 
 class Builder {
     private val parser = SpelExpressionParser()
-    private var rootDslElement: ConditionDslElement? = null
+    private var rootDslElement: AbstarctConditionDslElement? = null
 
-    fun appendDsl(dsl: () -> ConditionDslElement): Builder {
+    fun appendDsl(dsl: () -> AbstarctConditionDslElement): Builder {
         rootDslElement = dsl()
         return this
     }
 
-    fun collect(context: EvaluationContext): ConditionDslElementDto?
-        = rootDslElement?.eval(context, parser)?.let { ConditionDslElementDto(it) }
+    fun collect(context: EvaluationContext): ConditionDslElement?
+        = rootDslElement?.eval(context, parser)?.let { ConditionDslElement(it) }
 }
 
 interface Element {
-    fun eval(evContext: EvaluationContext, parser: SpelExpressionParser): ConditionDslElement
+    fun eval(evContext: EvaluationContext, parser: SpelExpressionParser): AbstarctConditionDslElement
 }
 
-abstract class ConditionDslElement(
+abstract class AbstarctConditionDslElement(
     val type: CondOp,
     val name: String? = null,
     var title: String? = null,
     var cond: String? = null,
 ) : Element {
-    var subConds: MutableList<ConditionDslElement>? = null
+    var subConds: MutableList<AbstarctConditionDslElement>? = null
     var state: Boolean? = null
         private set
     var childrenCount: Int = 0
@@ -36,13 +36,13 @@ abstract class ConditionDslElement(
     var stringified: String =""
         private set
 
-    protected fun <T : ConditionDslElement> initElement(tag: T, init: (T.() -> Unit)?): T {
+    protected fun <T : AbstarctConditionDslElement> initElement(tag: T, init: (T.() -> Unit)?): T {
         init?.also { it.invoke(tag) }
         subConds + tag
         return tag
     }
 
-    override fun eval(evContext: EvaluationContext, parser: SpelExpressionParser): ConditionDslElement {
+    override fun eval(evContext: EvaluationContext, parser: SpelExpressionParser): AbstarctConditionDslElement {
         if(type == PLAIN && cond != null) {
             state = parser.parseExpression(cond!!).getValue(evContext, Boolean::class.java) ?: false
             childrenCount = 0
@@ -66,46 +66,46 @@ abstract class ConditionDslElement(
         return this
     }
 
-    operator fun MutableList<ConditionDslElement>?.plus(condElement: ConditionDslElement): Unit {
+    operator fun MutableList<AbstarctConditionDslElement>?.plus(condElement: AbstarctConditionDslElement): Unit {
         if(subConds == null) subConds = mutableListOf()
         subConds!!.add(condElement)
     }
 
-    operator fun plus(condElement: ConditionDslElement): Unit {
-        subConds?.add(condElement) ?: run { subConds = mutableListOf<ConditionDslElement>().also { it.add(condElement) } }
+    operator fun plus(condElement: AbstarctConditionDslElement): Unit {
+        subConds?.add(condElement) ?: run { subConds = mutableListOf<AbstarctConditionDslElement>().also { it.add(condElement) } }
     }
 }
 
-data class ConditionDslElementDto(
+data class ConditionDslElement(
     val type: String,
     val title: String?,
     val state: Boolean,
     val cond: String?,
-    val subConds: List<ConditionDslElementDto>?,
+    val subConds: List<ConditionDslElement>?,
     var childrenCount: Int = 0,
     val stringified: String,
 ) {
-    constructor(dsl: ConditionDslElement): this(
+    constructor(dsl: AbstarctConditionDslElement): this(
         type = dsl.type.name,
         title = dsl.title,
         state = dsl.state!!,
         cond = dsl.cond,
-        subConds = dsl.subConds?.map { ConditionDslElementDto(it) },
+        subConds = dsl.subConds?.map { ConditionDslElement(it) },
         childrenCount = dsl.childrenCount,
         stringified = dsl.stringified,
     )
 }
 
-class PlainCond(cond: String, title: String? = null) : ConditionDslElement(PLAIN, name = "t", cond = cond, title = title)
+class PlainCond(cond: String, title: String? = null) : AbstarctConditionDslElement(PLAIN, name = "t", cond = cond, title = title)
 
-abstract class ConditionDslBoolElement(condOp: CondOp, name: String, title: String? = null) : ConditionDslElement(condOp, name = name, title = title) {
+abstract class AbstarctConditionDslBoolElement(condOp: CondOp, name: String, title: String? = null) : AbstarctConditionDslElement(condOp, name = name, title = title) {
     fun and(title: String? = null, init: AndOp.() -> Unit) = initElement(AndOp(title), init)
     fun or(title: String? = null, init: OrOp.() -> Unit) = initElement(OrOp(title), init)
     fun p(title: String?, cond: String, init: (PlainCond.() -> Unit)? = null) = initElement(PlainCond(cond, title), init)
 }
 
-class AndOp(title: String? = null) : ConditionDslBoolElement(AND, name = "and", title = title)
-class OrOp(title: String? = null) : ConditionDslBoolElement(OR, name = "or", title = title)
+class AndOp(title: String? = null) : AbstarctConditionDslBoolElement(AND, name = "and", title = title)
+class OrOp(title: String? = null) : AbstarctConditionDslBoolElement(OR, name = "or", title = title)
 
 fun and(title: String? = null, init: AndOp.() -> Unit): AndOp = AndOp(title).also(init)
 fun or(title: String? = null, init: OrOp.() -> Unit): OrOp = OrOp(title).also(init)

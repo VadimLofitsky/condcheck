@@ -1,9 +1,9 @@
-package lofitsky.condcheck.model
+package lofitsky.condcheck.pack.dlp.model
 
 import com.medicbk.calcfunc.FieldValue
 
 
-data class PatientThTypeCondCheckDataV0(
+data class PatientDlpCondCheckData(
     val fieldsToSkip: List<String>,
     val grade: Int,
     val score: Int,

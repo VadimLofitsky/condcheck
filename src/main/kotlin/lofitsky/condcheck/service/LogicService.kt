@@ -3,6 +3,6 @@ package lofitsky.condcheck.service
 import lofitsky.condcheck.model.DataObject
 
 
-interface ILogicService {
+interface LogicService {
     fun getDataObject(patientId: Long, isHfRiskFactor: Boolean, isPrevTherapyCheck: Boolean): DataObject
 }

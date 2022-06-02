@@ -2,7 +2,7 @@ package lofitsky.condcheck.controller
 
 import com.desprice.springutils.Slf4jLogger
 import lofitsky.condcheck.model.DataObject
-import lofitsky.condcheck.service.ILogicService
+import lofitsky.condcheck.service.LogicService
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -18,8 +18,9 @@ class CondCheckRestController {
     @Slf4jLogger
     private lateinit var logger: Logger
 
-    @Autowired @Qualifier("thTypeV0Service") private lateinit var logicThTypeV0Service: ILogicService
-    @Autowired @Qualifier("thTypeV1Service") private lateinit var logicThTypeV1Service: ILogicService
+    @Autowired @Qualifier("logicThTypeV0Service") private lateinit var logicThTypeV0Service: LogicService
+    @Autowired @Qualifier("logicThTypeV1Service") private lateinit var logicThTypeV1Service: LogicService
+    @Autowired @Qualifier("logicDlpService") private lateinit var logicDlpService: LogicService
 
     @GetMapping("v0")
     fun processV0(@RequestParam("patientId") patientId: Long,

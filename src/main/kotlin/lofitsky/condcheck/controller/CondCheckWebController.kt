@@ -15,11 +15,11 @@ class CondCheckWebController {
 
     @GetMapping("/v0")
     fun v0Page(): String {
-        return "condcheck0.html"
+        return "hp_th_type/hp_th_type0.html"
     }
 
     @GetMapping("/v1")
     fun v1Page(): String {
-        return "condcheck1.html"
+        return "hp_th_type/hp_th_type1.html"
     }
 }

@@ -1,9 +1,10 @@
-package lofitsky.condcheck.logic.sample
+package lofitsky.condcheck.pack.hp.sample
 
 import lofitsky.condcheck.logic.dsl.Builder
 import lofitsky.condcheck.logic.dsl.and
 import lofitsky.condcheck.logic.dsl.or
 import lofitsky.condcheck.logic.dsl.p
+import lofitsky.condcheck.logic.sample.LogicDsl
 
 
 object LogicDslHpThType1 : LogicDsl() {
@@ -128,9 +129,9 @@ object LogicDslHpThType1 : LogicDsl() {
                     p("пред.терапия = нет/моно/двойная", "@calcFunc.any(#selVarIds, {212L, 516L, 517L})")
 
                     or {
-                        this + cond6
-                        this + cond9
-                        this + cond10
+                        this+cond6
+                        this+cond9
+                        this+cond10
                     }
                 }
 

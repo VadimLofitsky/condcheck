@@ -1,14 +1,15 @@
-package lofitsky.condcheck.service
+package lofitsky.condcheck.pack.hp.service.impl
 
 import com.desprice.springutils.Slf4jLogger
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.medicbk.calcfunc.CalcScriptContext
 import lofitsky.condcheck.getFieldsMap
-import lofitsky.condcheck.logic.dsl.ConditionDslElementDto
-import lofitsky.condcheck.logic.sample.LogicDslHpThType1
+import lofitsky.condcheck.logic.dsl.ConditionDslElement
 import lofitsky.condcheck.model.DataObject
-import lofitsky.condcheck.model.PatientThTypeCondCheckDataV0
+import lofitsky.condcheck.pack.hp.model.PatientThTypeCondCheckDataV0
+import lofitsky.condcheck.pack.hp.sample.LogicDslHpThType0
+import lofitsky.condcheck.service.LogicService
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -16,8 +17,8 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 
-@Service(value = "thTypeV1Service")
-class LogicThTypeV1ServiceImpl : ILogicService {
+@Service(value = "logicThTypeV0Service")
+class LogicThTypeV0ServiceImpl : LogicService {
     @Slf4jLogger
     private lateinit var logger: Logger
 
@@ -57,13 +58,13 @@ class LogicThTypeV1ServiceImpl : ILogicService {
             .let { it.copy(selVarIds = it.selVarIds.sorted()) }
     }
 
-    private fun getDslTree(patientCondCheckDataMap: Map<String, Any?>): ConditionDslElementDto? {
+    private fun getDslTree(patientCondCheckDataMap: Map<String, Any?>): ConditionDslElement? {
         val context = calcScriptContext.createContext()
         patientCondCheckDataMap.forEach {
             context.setVariable(it.key, it.value)
         }
 
-        return LogicDslHpThType1.dsl.collect(context)
+        return LogicDslHpThType0.dsl.collect(context)
     }
 
     override fun getDataObject(patientId: Long, isHfRiskFactor: Boolean, isPrevTherapyCheck: Boolean): DataObject {

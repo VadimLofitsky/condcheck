@@ -1,14 +1,15 @@
-package lofitsky.condcheck.service
+package lofitsky.condcheck.pack.dlp.service.impl
 
 import com.desprice.springutils.Slf4jLogger
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.medicbk.calcfunc.CalcScriptContext
 import lofitsky.condcheck.getFieldsMap
-import lofitsky.condcheck.logic.dsl.ConditionDslElementDto
-import lofitsky.condcheck.logic.sample.LogicDslHpThType0
+import lofitsky.condcheck.logic.dsl.ConditionDslElement
 import lofitsky.condcheck.model.DataObject
-import lofitsky.condcheck.model.PatientThTypeCondCheckDataV0
+import lofitsky.condcheck.pack.dlp.model.PatientDlpCondCheckData
+import lofitsky.condcheck.pack.dlp.sample.LogicDslDlp
+import lofitsky.condcheck.service.LogicService
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -16,8 +17,8 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 
-@Service(value = "thTypeV0Service")
-class LogicThTypeV0ServiceImpl : ILogicService {
+@Service(value = "logicDlpService")
+class LogicDlpServiceImpl : LogicService {
     @Slf4jLogger
     private lateinit var logger: Logger
 
@@ -38,7 +39,7 @@ class LogicThTypeV0ServiceImpl : ILogicService {
         return isNotExpired to exitValue
     }
 
-    private fun getPatientCondCheckData(patientId: Long, isHfRiskFactor: Boolean, isPrevTherapyCheck: Boolean): PatientThTypeCondCheckDataV0 {
+    private fun getPatientCondCheckData(patientId: Long, isHfRiskFactor: Boolean, isPrevTherapyCheck: Boolean): PatientDlpCondCheckData {
         val (isNotExpired, exitValue) = runHpTask(patientId, isHfRiskFactor, isPrevTherapyCheck)
 
         if(!isNotExpired) {
@@ -53,17 +54,17 @@ class LogicThTypeV0ServiceImpl : ILogicService {
         logger.info("Обработка ответа задачи gradle")
         return File("/home/vadim/MyPrjs/kt/condcheck/patient_datas/patient${patientId}_data.txt")
             .readBytes()
-            .let { jacksonObjectMapper().readValue<PatientThTypeCondCheckDataV0>(it) }
+            .let { jacksonObjectMapper().readValue<PatientDlpCondCheckData>(it) }
             .let { it.copy(selVarIds = it.selVarIds.sorted()) }
     }
 
-    private fun getDslTree(patientCondCheckDataMap: Map<String, Any?>): ConditionDslElementDto? {
+    private fun getDslTree(patientCondCheckDataMap: Map<String, Any?>): ConditionDslElement? {
         val context = calcScriptContext.createContext()
         patientCondCheckDataMap.forEach {
             context.setVariable(it.key, it.value)
         }
 
-        return LogicDslHpThType0.dsl.collect(context)
+        return LogicDslDlp.dsl.collect(context)
     }
 
     override fun getDataObject(patientId: Long, isHfRiskFactor: Boolean, isPrevTherapyCheck: Boolean): DataObject {

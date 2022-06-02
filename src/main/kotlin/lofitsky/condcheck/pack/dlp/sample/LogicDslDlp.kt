@@ -1,18 +1,19 @@
-package lofitsky.condcheck.logic.sample
+package lofitsky.condcheck.pack.dlp.sample
 
 import lofitsky.condcheck.logic.dsl.Builder
 import lofitsky.condcheck.logic.dsl.and
 import lofitsky.condcheck.logic.dsl.or
 import lofitsky.condcheck.logic.dsl.p
+import lofitsky.condcheck.logic.sample.LogicDsl
 
 
-object LogicDslHpThType0 : LogicDsl() {
+object LogicDslDlp : LogicDsl() {
     private val builder = Builder()
 
     private val cond1 = p("cond1: пред.терапия == Нет", "#selVarIds.contains(212L)")
     private val cond2 = p("cond2: пред.терапия <> Нет", "!#selVarIds.contains(212L)")
 
-    private val cond3 = and("cond3: Соотв. КР и ЦЗ АД достигнуты") {
+    private val cond3 = and("cond3: Соответствует КР") {
             p("пред.терапия +КР +ЦП", "#prevTherapyIsGood")
             p("не проверка пред.терапии", "!#isPrevTherapyCheck")
         }
@@ -41,7 +42,7 @@ object LogicDslHpThType0 : LogicDsl() {
         }
 
     private val cond6 = and("cond6: grade == 1 и (В/ОчВ/Экстр риск или ПОМ)") {
-            p("grade == 1", "#grade==1")
+            p("grade == 1", "#grade == 1")
 
             or("В/ОчВ/Экстр риск или ПОМ") {
                 p("очень высокий score", "#score >= #scoreHighLowerBound")
@@ -60,7 +61,7 @@ object LogicDslHpThType0 : LogicDsl() {
 //      cond8 text default ''; -- условие со старческой астенией
 
     private val cond9 = and("cond9: (САД=150..159 или ДАД=90..99) и низкий/умеренный риск") {
-            or("") {
+            or("САД=150..159 или ДАД=90..99") {
                 and("") {
                     p("САД >= 150", "#sbp >= 150")
                     p("САД < 160", "#sbp < 160")
@@ -84,73 +85,81 @@ object LogicDslHpThType0 : LogicDsl() {
 
     override val dsl = builder.appendDsl {
         or {
-            and("ОЖ") {
-                this+cond1
-
-                or {
-                    this+cond4
-                    this+cond5
-                    this+cond6
-                }
+            // cond4 || ' || ' || cond5 || ' || ' || cond6
+            or("ОЖ") {
+                this+ cond4
+                this+ cond5
+                this+ cond6
             }
 
+            // (' || cond3 || ' && #selVarIds.contains(516L)) || (' || cond1 || ' && (' || cond4 || ' || ' || cond5 || ' || ' || cond7 || ')) || #isPrevTherapyCheck
             or("моно") {
                 and {
-                    this+cond3
+                    this+ cond3
                     p("пред.терапия = моно", "#selVarIds.contains(516L)")
                 }
 
                 and {
-                    this+cond1
+                    this+ cond1
                     or {
-                        this+cond4
-                        this+cond5
-                        this+cond7
+                        this+ cond4
+                        this+ cond5
+                        this+ cond7
                     }
                 }
+
+                p("проверка пред.терапии", "#isPrevTherapyCheck")
             }
 
+/*
+            // cond6 || ' || ' || cond9 || ' || ' || cond10 || ' || @calcFunc.any(#selVarIds, {213L, 516L, 517L}) || #isPrevTherapyCheck
+            or("двойная") {
+                this+cond6
+                this+cond9
+                this+cond10
+
+                p("пред.терапия = другая/моно/двойная", "@calcFunc.any(#selVarIds, {213L, 516L, 517L})")
+                p("проверка пред.терапии", "#isPrevTherapyCheck")
+            }
+*/
+            // (@calcFunc.any(#selVarIds, {213L, 516L, 517L}) && (cond6 || cond9 || cond10)) || @calcFunc.any(#selVarIds, {213L, 516L, 517L}) || #isPrevTherapyCheck
+            // (@calcFunc.any(#selVarIds, {516L, 517L}) && (' || cond6 || ' || ' || cond9 || ' || ' || cond10 || ')) || #selVarIds.contains(213L) || #isPrevTherapyCheck
             or("двойная") {
                 and {
-                    this+cond3
-                    p("пред.терапия = двойная", "#selVarIds.contains(517L)")
-                }
+                    p("пред.терапия = нет/моно/двойная", "@calcFunc.any(#selVarIds, {212L, 516L, 517L})")
 
-                or {
-                    and {
-                        this+cond1
-                        or {
-                            this+cond6
-                            this+cond9
-                            this+cond10
-                        }
+                    or {
+                        this+ cond6
+                        this+ cond9
+                        this+ cond10
                     }
-
-                    p("пред.терапия = моно", "#selVarIds.contains(516L)")
-                    p("проверка пред.терапии", "#isPrevTherapyCheck")
-                    p("пред.терапия = другая", "#selVarIds.contains(213L)")
                 }
+
+                p("пред.терапия = другая", "#selVarIds.contains(213L)")
+                p("проверка пред.терапии", "#isPrevTherapyCheck")
             }
 
+            // (' || cond3 || ' && #selVarIds.contains(518L)) || #subgroupId==4 || @calcFunc.any(#selVarIds, {213L, 517L, 518L, 519L}) || #isPrevTherapyCheck
             or("тройная") {
                 and {
-                    this+cond3
+                    this+ cond3
                     p("пред.терапия = тройная", "#selVarIds.contains(518L)")
                 }
 
-                p("проверка пред.терапии", "#isPrevTherapyCheck")
                 p("ФР = СН", "#subgroupId == 4")
-                p("пред.терапия = дргуая/тройная", "@calcFunc.any(#selVarIds, {213L, 517L})")
+                p("пред.терапия = дргуая/двойная/тройная/тройная+", "@calcFunc.any(#selVarIds, {213L, 517L, 518L, 519L})")
+                p("проверка пред.терапии", "#isPrevTherapyCheck")
             }
 
+            // (' || cond3 || ' && #selVarIds.contains(519L)) || @calcFunc.any(#selVarIds, {213L, 518L, 519L}) || #isPrevTherapyCheck
             or("тройная+") {
                 and {
-                    this+cond3
+                    this+ cond3
                     p("пред.терапия = тройная+", "#selVarIds.contains(519L)")
                 }
 
-                p("проверка пред.терапии", "#isPrevTherapyCheck")
                 p("пред.терапия = дргуая/тройная/тройная+", "@calcFunc.any(#selVarIds, {213L, 518L, 519L})")
+                p("проверка пред.терапии", "#isPrevTherapyCheck")
             }
 
             or("резистентная") {
